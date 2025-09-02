@@ -1,0 +1,253 @@
+---
+
+## 1. Định tuyến yêu cầu (Request Routing)
+- **Mô tả**: Chuyển hướng request từ client đến đúng microservice dựa trên path, HTTP method hoặc tiêu chí khác.
+- **Ví dụ**: Proxy `/api/v1/users` → `users-service`, `/api/v1/orders` → `orders-service`.
+- **Triển khai**: Sử dụng `http-proxy-middleware` với `proxyConfig` để định nghĩa route động.
+- **Trạng thái**: Đã triển khai (`/api/v1/users`, `/api/v1/auth`).
+- **Best Practice**:
+  - Dùng biến môi trường cho service URLs
+  - Path rewriting để ẩn internal structure
+  - WebSocket support cho realtime features
+
+---
+
+## 2. Xác thực & Phân quyền (Authentication & Authorization)
+- **Mô tả**: Kiểm tra danh tính và quyền truy cập trước khi chuyển tiếp request.
+- **Ví dụ**: Xác minh JWT, OAuth token, API key; kiểm tra vai trò (admin, user...).
+- **Triển khai**: Middleware xác minh JWT bằng `jsonwebtoken`. Bỏ qua một số route public (`/api/v1/auth`, `/api/v1/docs`).
+- **Trạng thái**: Mới tích hợp Swagger (`addBearerAuth`), chưa có middleware chuyên biệt.
+- **Best Practice**:
+  - JWT validation ở gateway level
+  - Public routes whitelist
+  - Role-based access control (RBAC)
+  - Token refresh handling
+
+---
+
+## 3. Giới hạn tần suất (Rate Limiting)
+- **Mô tả**: Giới hạn số lượng request từ một client để tránh quá tải/DDoS.
+- **Ví dụ**: Tối đa 100 request mỗi IP trong 15 phút.
+- **Triển khai**: Dùng `@nestjs/throttler` hoặc `express-rate-limit`.
+- **Trạng thái**: Chưa triển khai. Khuyến nghị bổ sung.
+- **Best Practice**:
+  - IP-based rate limiting
+  - User-based rate limiting (nếu có auth)
+  - Different limits cho different endpoints
+  - Rate limit headers trong response
+
+---
+
+## 4. Kiểm tra dữ liệu đầu vào (Input Validation)
+- **Mô tả**: Xác minh và làm sạch dữ liệu request (body, query, params).
+- **Ví dụ**: Kiểm tra email hợp lệ, trường bắt buộc với `class-validator`.
+- **Triển khai**: Dùng `ValidationPipe` + `validationOptions`.
+- **Trạng thái**: Đã triển khai, có phản hồi lỗi chi tiết.
+- **Best Practice**:
+  - Whitelist validation
+  - Transform data types
+  - Custom validation decorators
+  - Detailed error messages
+
+---
+
+## 5. Cân bằng tải (Load Balancing)
+- **Mô tả**: Phân phối request đến nhiều instance để đảm bảo khả năng mở rộng và sẵn sàng.
+- **Ví dụ**: `users-service` có nhiều instance.
+- **Triển khai**: Tích hợp load balancer (Nginx) hoặc `http-proxy-middleware` nhiều target.
+- **Trạng thái**: Chưa triển khai. Gợi ý dùng Kubernetes hoặc service registry.
+- **Best Practice**:
+  - Round-robin hoặc least-connections
+  - Health check cho backend instances
+  - Failover mechanism
+  - Session affinity nếu cần
+
+---
+
+## 6. Bộ nhớ đệm (Caching)
+- **Mô tả**: Cache phản hồi để giảm độ trễ và tải hệ thống.
+- **Ví dụ**: Cache danh sách sản phẩm từ `products-service` bằng Redis.
+- **Triển khai**: `cache-manager` hoặc Redis.
+- **Trạng thái**: Chưa triển khai. Khuyến nghị bổ sung cho dữ liệu truy cập thường xuyên.
+- **Best Practice**:
+  - Cache GET requests only
+  - Cache invalidation strategy
+  - TTL configuration
+  - Cache headers (ETag, Last-Modified)
+
+---
+
+## 7. Ghi log & Giám sát (Logging & Monitoring)
+- **Mô tả**: Ghi nhận request/response/lỗi để debug và theo dõi hiệu năng.
+- **Ví dụ**: Dùng `morgan` để log, Prometheus/Grafana để giám sát.
+- **Triển khai**: Đã có `morgan`.
+- **Trạng thái**: Chưa tích hợp Prometheus/Grafana.
+- **Best Practice**:
+  - Structured logging (JSON format)
+  - Request ID tracking
+  - Performance metrics
+  - Error aggregation
+  - Alerting rules
+
+---
+
+## 8. Xử lý lỗi (Error Handling)
+- **Mô tả**: Chuẩn hóa và xử lý lỗi từ microservice, trả về phản hồi đồng nhất.
+- **Ví dụ**: Lỗi 500 từ service → Gateway trả về 502 kèm thông báo rõ ràng.
+- **Triển khai**: `onError` trong `http-proxy-middleware`, global error handler.
+- **Trạng thái**: Mới xử lý lỗi validation. Chưa có xử lý lỗi proxy tổng thể.
+- **Best Practice**:
+  - Standardized error format
+  - Error codes mapping
+  - Retry mechanism
+  - Circuit breaker integration
+  - User-friendly error messages
+
+---
+
+## 9. Tài liệu API (API Documentation)
+- **Mô tả**: Cung cấp tài liệu API cho developer.
+- **Ví dụ**: Swagger UI tại `/api/v1/docs`.
+- **Triển khai**: `@nestjs/swagger`.
+- **Trạng thái**: Đã triển khai, có `BearerAuth` và custom header (`x-custom-lang`).
+- **Best Practice**:
+  - OpenAPI 3.0 specification
+  - Authentication documentation
+  - Example requests/responses
+  - Interactive testing
+  - Version-specific docs
+
+---
+
+## 10. Hỗ trợ WebSocket & Streaming
+- **Mô tả**: Quản lý WebSocket và streaming dữ liệu.
+- **Ví dụ**: Realtime chat tại `/api/v1/messages`.
+- **Triển khai**: `ws: true` trong `http-proxy-middleware`.
+- **Trạng thái**: Đã triển khai.
+- **Best Practice**:
+  - WebSocket upgrade handling
+  - Connection pooling
+  - Message routing
+  - Heartbeat mechanism
+  - Graceful connection close
+
+---
+
+## 11. Biến đổi Request/Response
+- **Mô tả**: Chỉnh sửa dữ liệu request/response để phù hợp yêu cầu.
+- **Ví dụ**: Thêm header, thay đổi format JSON.
+- **Triển khai**: Middleware tùy chỉnh.
+- **Trạng thái**: Chưa triển khai.
+- **Best Practice**:
+  - Header transformation
+  - Request/response body modification
+  - Content-type handling
+  - Compression (gzip)
+  - Custom middleware chain
+
+---
+
+## 12. Phiên bản API (API Versioning)
+- **Mô tả**: Hỗ trợ nhiều phiên bản API cho backward compatibility.
+- **Ví dụ**: `/api/v1/users` và `/api/v2/users`.
+- **Triển khai**: `VersioningType.URI` với version mặc định `v1`.
+- **Trạng thái**: Đã triển khai.
+- **Best Practice**:
+  - URI versioning (recommended)
+  - Header versioning (alternative)
+  - Default version handling
+  - Deprecation warnings
+  - Migration strategy
+
+---
+
+## 13. Kiểm tra tình trạng (Health Check)
+- **Mô tả**: Cung cấp endpoint kiểm tra tình trạng Gateway và microservice.
+- **Ví dụ**: `/api/v1/health`.
+- **Triển khai**: Endpoint GET.
+- **Trạng thái**: Đã triển khai.
+- **Best Practice**:
+  - Liveness probe
+  - Readiness probe
+  - Dependency health checks
+  - Detailed health status
+  - Health check aggregation
+
+---
+
+## 14. Circuit Breaker
+- **Mô tả**: Tạm ngừng gửi request đến service bị lỗi liên tục để tránh lan truyền sự cố.
+- **Ví dụ**: Dừng proxy đến `users-service` khi gặp nhiều lỗi 500.
+- **Triển khai**: Thư viện `opossum`.
+- **Trạng thái**: Chưa triển khai.
+- **Best Practice**:
+  - Failure threshold configuration
+  - Recovery timeout
+  - Half-open state
+  - Fallback responses
+  - Circuit breaker metrics
+
+---
+
+## 15. Service Discovery
+- **Mô tả**: Tự động tìm microservice instance qua service registry.
+- **Ví dụ**: Consul, Eureka, hoặc Kubernetes Service.
+- **Triển khai**: Kết nối registry hoặc Kubernetes.
+- **Trạng thái**: Chưa triển khai (hiện dùng biến môi trường).
+- **Best Practice**:
+  - Service registry integration
+  - Dynamic service discovery
+  - Health check integration
+  - Load balancing integration
+  - Service mesh compatibility
+
+---
+
+## 16. Các vấn đề cắt ngang (Cross-Cutting Concerns)
+- **Mô tả**: Xử lý các tác vụ chung (nén dữ liệu, thêm header...).
+- **Ví dụ**: Nén bằng Gzip, thêm `x-custom-lang`.
+- **Triển khai**: Middleware `compression`, custom header.
+- **Trạng thái**: Mới có header, chưa có nén.
+- **Best Practice**:
+  - Compression middleware
+  - Custom headers injection
+  - Request/response transformation
+  - Cross-origin handling
+  - Security headers
+
+---
+
+## 17. Quản lý cấu hình (Configuration Management)
+- **Mô tả**: Quản lý URL, secrets, setting của microservice.
+- **Ví dụ**: `USERS_SERVICE_URL` từ `.env` hoặc Vault.
+- **Triển khai**: Biến môi trường (`process.env`).
+- **Trạng thái**: Đã triển khai.
+- **Best Practice**:
+  - Environment-based configuration
+  - Secret management (Vault, AWS Secrets Manager)
+  - Configuration validation
+  - Hot reload capability
+  - Configuration versioning
+
+## Triển Khai Khuyến Nghị
+
+### Phase 1 (Hiện tại - Slim Gateway)
+- ✅ Request Routing
+- ✅ Basic Security (CORS, Helmet)
+- ✅ Logging (Morgan)
+- ✅ Health Check
+- ✅ Configuration Management
+
+### Phase 2 (Sắp tới)
+- 🔄 Authentication & Authorization
+- 🔄 Rate Limiting
+- 🔄 Error Handling
+- 🔄 API Documentation (Swagger)
+
+### Phase 3 (Tương lai)
+- 📋 Load Balancing
+- 📋 Caching
+- 📋 Circuit Breaker
+- 📋 Service Discovery
+- 📋 Advanced Monitoring
+
