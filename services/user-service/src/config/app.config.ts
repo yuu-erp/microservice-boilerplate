@@ -1,7 +1,4 @@
-import dotenv from "dotenv";
-import { z } from "zod";
-
-dotenv.config();
+import { createConfig, z } from "@shared/config";
 
 const EnvSchema = z.object({
   PORT: z.string().default("4000"),
@@ -13,7 +10,7 @@ const EnvSchema = z.object({
   RATE_LIMIT_MAX: z.string().default("300"),
 });
 
-const env = EnvSchema.parse(process.env);
+const env = createConfig(EnvSchema) as Record<string, string>;
 
 export interface AppConfig {
   port: number;
@@ -24,12 +21,12 @@ export interface AppConfig {
 }
 
 const appConfig: AppConfig = {
-  port: parseInt(env.PORT, 10),
-  nodeEnv: env.NODE_ENV,
+  port: parseInt(env.PORT!, 10),
+  nodeEnv: env.NODE_ENV!,
   isDev: env.NODE_ENV !== "production",
   rateLimit: {
-    windowMs: parseInt(env.RATE_LIMIT_WINDOW_MS, 10),
-    max: parseInt(env.RATE_LIMIT_MAX, 10),
+    windowMs: parseInt(env.RATE_LIMIT_WINDOW_MS!, 10),
+    max: parseInt(env.RATE_LIMIT_MAX!, 10),
   },
   cors: {
     origin: env.CORS_ORIGIN ? env.CORS_ORIGIN.split(",") : "*",

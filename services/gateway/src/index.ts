@@ -2,6 +2,7 @@ import { LoggerService } from '@shared/logger';
 import { Express } from 'express';
 import config from './config/app.config';
 import { createApp } from './app';
+import { initOtel } from '@shared/otel';
 
 // Initialize Express app
 const app: Express = createApp();
@@ -11,6 +12,9 @@ const logger = new LoggerService({
   isDev: config.isDev,
   appName: 'gateway', // For namespaced log files
 });
+
+// Init OpenTelemetry (optional endpoint via env OTEL_EXPORTER_OTLP_ENDPOINT)
+initOtel('gateway', process.env.OTEL_EXPORTER_OTLP_ENDPOINT);
 
 // Attach request logging middleware if available
 app.use(logger.expressMiddleware?.() || ((req, res, next) => next()));

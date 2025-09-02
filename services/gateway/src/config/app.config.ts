@@ -1,51 +1,41 @@
-import dotenv from "dotenv";
+import { createConfig, z } from "@shared/config";
 
-// Load environment variables
-const result = dotenv.config();
-if (result.error) {
-  throw new Error(`Failed to load .env file: ${result.error.message}`);
-}
-
-// Interface for type safety
-interface AppConfig {
+export interface AppConfig {
   port: number;
   nodeEnv: string;
   isDev: boolean;
-  rateLimit: {
-    windowMs: number;
-    max: number;
-  };
-  cors: {
-    origin: string | string[];
-    methods: string[];
-    credentials: boolean;
-  };
-  authServiceUrl: string
+  rateLimit: { windowMs: number; max: number };
+  cors: { origin: string | string[]; methods: string[]; credentials: boolean };
+  authServiceUrl: string;
 }
 
-// Configuration with validation
+const Schema = z.object({
+  PORT: z.string().default("3000"),
+  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
+  RATE_LIMIT_WINDOW_MS: z.string().default("60000"),
+  RATE_LIMIT_MAX: z.string().default("300"),
+  CORS_ORIGIN: z.string().optional(),
+  CORS_METHODS: z.string().optional(),
+  CORS_CREDENTIALS: z.string().optional(),
+  AUTH_SERVICE_URL: z.string().url().optional().default("http://"),
+});
+
+const env = createConfig(Schema) as Record<string, string>;
+
 const appConfig: AppConfig = {
-  port: parseInt(process.env.PORT || "3000", 10),
-  nodeEnv: process.env.NODE_ENV || "development",
-  isDev: process.env.NODE_ENV !== "production",
+  port: parseInt(env.PORT, 10),
+  nodeEnv: env.NODE_ENV,
+  isDev: env.NODE_ENV !== "production",
   rateLimit: {
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "60_000", 10),
-    max: parseInt(process.env.RATE_LIMIT_MAX || "300", 10),
+    windowMs: parseInt(env.RATE_LIMIT_WINDOW_MS, 10),
+    max: parseInt(env.RATE_LIMIT_MAX, 10),
   },
   cors: {
-    origin: process.env.CORS_ORIGIN?.split(",") || "*",
-    methods: (process.env.CORS_METHODS?.split(",") || ["GET", "POST", "PUT", "DELETE"]).map(method => method.trim()),
-    credentials: process.env.CORS_CREDENTIALS === "true",
+    origin: env.CORS_ORIGIN ? env.CORS_ORIGIN.split(",") : "*",
+    methods: (env.CORS_METHODS?.split(",") || ["GET", "POST", "PUT", "DELETE"]).map((m) => m.trim()),
+    credentials: env.CORS_CREDENTIALS === "true",
   },
-  authServiceUrl: process.env.AUTH_SERVICE_URL || "http://",
+  authServiceUrl: env.AUTH_SERVICE_URL,
 };
-
-// Validate critical configurations
-if (isNaN(appConfig.port)) {
-  throw new Error("Invalid PORT environment variable: must be a number");
-}
-if (isNaN(appConfig.rateLimit.windowMs) || isNaN(appConfig.rateLimit.max)) {
-  throw new Error("Invalid rate limit configuration: windowMs and max must be numbers");
-}
 
 export default appConfig;

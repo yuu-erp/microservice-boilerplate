@@ -1,35 +1,20 @@
 import express, { Express } from "express";
-import cors from "cors";
-import helmet from "helmet";
-import rateLimit from "express-rate-limit";
-
 import config from "./config/app.config";
 import { errorHandler } from "./middlewares";
 import apiRouter from "./routers";
-import systemRouter from "./routers/system.router";
+import { applyCommonMiddlewares, createSystemRouter } from "@shared/express-bootstrap";
 
 export const createApp = (): Express => {
   const app = express();
 
-  app.use(express.json());
-  app.use(
-    rateLimit({
-      windowMs: config.rateLimit.windowMs,
-      max: config.rateLimit.max,
-      message: { error: "Too many requests, please try again later" },
-    })
-  );
-  app.use(helmet());
-  app.use(
-    cors({
-      origin: config.cors.origin,
-      methods: ["GET", "POST", "PUT", "DELETE"],
-      credentials: true,
-    })
-  );
+  applyCommonMiddlewares(app, {
+    isDev: config.isDev,
+    rateLimit: config.rateLimit,
+    cors: { origin: config.cors.origin, methods: ["GET", "POST", "PUT", "DELETE"], credentials: true },
+  });
 
   // System routes
-  app.use(systemRouter);
+  app.use(createSystemRouter());
 
   // API routes
   app.use("/api/v1", apiRouter);

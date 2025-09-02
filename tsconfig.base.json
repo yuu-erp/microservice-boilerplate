@@ -14,7 +14,9 @@
       "@shared/exception": ["shared/exception/src"],
       "@shared/otel": ["shared/otel/src"],
       "@shared/types": ["shared/types/src"],
-      "@shared/http": ["shared/http/src"]
+      "@shared/http": ["shared/http/src"],
+      "@shared/express-bootstrap": ["shared/express-bootstrap/src"],
+      "@shared/config": ["shared/config/src"]
     }
   }
 }
