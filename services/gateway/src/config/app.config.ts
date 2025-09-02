@@ -29,7 +29,7 @@ const appConfig: AppConfig = {
   nodeEnv: process.env.NODE_ENV || "development",
   isDev: process.env.NODE_ENV !== "production",
   rateLimit: {
-    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "60000", 10),
+    windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "60_000", 10),
     max: parseInt(process.env.RATE_LIMIT_MAX || "300", 10),
   },
   cors: {
