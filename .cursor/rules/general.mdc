@@ -17,6 +17,7 @@ alwaysApply: true
 - scope: phạm vi ảnh hưởng, ví dụ auth, user-service, gateway
 - subject: mô tả ngắn gọn bằng tiếng Việt, viết thường, không dấu câu cuối
 - icon: emoji thể hiện ý nghĩa commit
+- thông điệp commit phải sử dụng tiếng Việt có dấu đầy đủ
 
 # VÍ DỤ COMMIT
 feat(auth): thêm chức năng đăng nhập bằng Google ✨
