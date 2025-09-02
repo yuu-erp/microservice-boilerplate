@@ -1,61 +1,19 @@
 import { LoggerService } from '@shared/logger';
-import cors from 'cors';
-import express, { Express, Request, Response, NextFunction } from 'express';
-import rateLimit from 'express-rate-limit';
-import helmet from 'helmet';
-import client from 'prom-client';
+import { Express } from 'express';
 import config from './config/app.config';
-import { errorHandler } from './middlewares';
-import router from './routers';
+import { createApp } from './app';
 
 // Initialize Express app
-const app: Express = express();
+const app: Express = createApp();
 // Initialize logger
 const logger = new LoggerService({
   moduleName: 'App',
   isDev: config.isDev,
   appName: 'gateway', // For namespaced log files
 });
-// Collect default Prometheus metrics
-client.collectDefaultMetrics();
 
-// Middleware
-app.use(express.json());
-app.use(
-  rateLimit({
-    windowMs: config.rateLimit.windowMs,
-    max: config.rateLimit.max,
-    message: { error: 'Too many requests, please try again later' },
-  }),
-);
-app.use(helmet());
-app.use(
-  cors({
-    origin: config.cors.origin,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true,
-  }),
-);
-app.use(logger.expressMiddleware?.() || ((req, res, next) => next())); // Fallback if middleware is undefined
-
-// Health and readiness endpoints
-router.get('/healthz', (_req: Request, res: Response) => res.json({ status: 'ok' }));
-router.get('/readyz', (_req: Request, res: Response) => res.json({ ready: true }));
-router.get('/metrics', async (_req: Request, res: Response, next: NextFunction) => {
-  try {
-    res.set('Content-Type', client.register.contentType);
-    res.end(await client.register.metrics());
-  } catch (error) {
-    logger.error(error instanceof Error ? error : new Error('Unknown error in metrics endpoint'));
-    next(error); // Delegate to global error handler
-  }
-});
-
-// API routes
-app.use('/api/v1', router);
-
-// Global error handling middleware
-router.use(errorHandler);
+// Attach request logging middleware if available
+app.use(logger.expressMiddleware?.() || ((req, res, next) => next()));
 
 // Start server
 const server = app.listen(config.port, () => {
