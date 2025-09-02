@@ -1,7 +1,7 @@
 import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './modules/app.module';
-import config from '../../src/config/app.config';
+import config from './config/app.config';
 import { LoggerService } from '@shared/logger';
 
 async function bootstrap(): Promise<void> {
@@ -25,5 +25,6 @@ async function bootstrap(): Promise<void> {
 }
 
 bootstrap();
+
 
 
