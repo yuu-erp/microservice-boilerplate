@@ -1,8 +1,8 @@
+import { applyCommonMiddlewares, createSystemRouter } from "@shared/express-bootstrap";
 import express, { Express } from "express";
 import config from "./config/app.config";
 import { errorHandler } from "./middlewares";
 import apiRouter from "./routers";
-import { applyCommonMiddlewares, createSystemRouter } from "@shared/express-bootstrap";
 
 export const createApp = (): Express => {
   const app = express();
@@ -18,7 +18,6 @@ export const createApp = (): Express => {
 
   // API routes
   app.use("/api/v1", apiRouter);
-
   // Global error handler
   app.use(errorHandler);
 
