@@ -1,6 +1,7 @@
-import { NextFunction, Request, Response } from 'express';
 import fs from 'fs/promises';
 import path from 'path';
+
+import { NextFunction, Request, Response } from 'express';
 import { createLogger, format, Logger, LoggerOptions, transports } from 'winston';
 import DailyRotateFile from 'winston-daily-rotate-file';
 import { v4 as uuidv4 } from 'uuid';
@@ -25,6 +26,10 @@ export interface LoggerOptionsExtended {
   level?: LogLevel;
   isDev?: boolean;
   appName?: string; // For namespacing log files
+}
+
+interface RequestWithId extends Request {
+  requestId?: string;
 }
 
 export class LoggerService {
@@ -141,7 +146,8 @@ export class LoggerService {
       });
 
       // Attach requestId to req for downstream use
-      (req as any).requestId = requestId;
+      const reqWithId = req as RequestWithId;
+      reqWithId.requestId = requestId;
       next();
     };
   }
