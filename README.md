@@ -1,4 +1,4 @@
-# Micro Chat — Enterprise Microservices (Node.js + TypeScript + Docker + K8s)
+# Enterprise Microservices (Node.js + TypeScript + Docker + K8s)
 
 A production-grade scaffold for a chat-style microservices system.
 Includes: Turborepo monorepo, shared libs, Express services with health/ready/metrics,
