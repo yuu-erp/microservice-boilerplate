@@ -1,0 +1,10 @@
+---
+description: Quy trình làm việc (branching, lint/test, push)
+alwaysApply: true
+---
+
+# QUY TRÌNH LÀM VIỆC
+- Nhánh: không push trực tiếp `main/master`, tạo `feat/*`, `fix/*`.
+- Trước push: `git pull origin main --rebase`.
+- Trước commit/push: `yarn lint` và `yarn test` (nếu có test).
+- Husky + commitlint bắt buộc hoạt động; commit sai chuẩn bị reject.

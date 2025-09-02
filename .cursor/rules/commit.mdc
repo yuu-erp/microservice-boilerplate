@@ -1,0 +1,13 @@
+---
+description: Quy tắc Conventional Commits + emoji
+alwaysApply: true
+---
+
+# COMMIT CHUẨN
+- Conventional Commits: `type(scope): subject emoji`.
+- Type: `feat ✨`, `fix 🐛`, `docs 📝`, `style 💄`, `refactor ♻️`, `test ✅`, `chore 🔧`.
+- Subject: tiếng Việt có dấu, ngắn gọn, không dấu câu cuối.
+- Bắt buộc dùng tiếng Việt có dấu đầy đủ.
+- Ví dụ:
+  - `feat(auth): thêm đăng nhập Google ✨`
+  - `fix(user-service): sửa lỗi không load profile 🐛`

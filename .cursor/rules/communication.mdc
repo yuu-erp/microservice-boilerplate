@@ -1,0 +1,11 @@
+---
+description: Quy tắc giao tiếp và phản hồi của trợ lý
+alwaysApply: true
+---
+
+# GIAO TIẾP
+- Luôn phản hồi bằng tiếng Việt có dấu.
+- Trả lời súc tích, ưu tiên gạch đầu dòng, làm rõ ý chính.
+- Đoạn mã khi hiển thị phải đúng Markdown, hạn chế giải thích dài dòng.
+- Khi nhắc tới tên file/thư mục/hàm/lớp, dùng `code inline`.
+- Không chia sẻ secrets; nếu cần cấu hình, dùng biến môi trường.

@@ -1,0 +1,11 @@
+---
+description: Quy tắc mã hoá và style code
+alwaysApply: true
+---
+
+# MÃ HOÁ
+- Tất cả mã nguồn phải viết bằng TypeScript (kể cả scripts).
+- Tuân theo eslint + prettier chung của dự án.
+- Không hard-code secrets, dùng biến môi trường `.env`.
+- Giữ cấu trúc import: nhóm built-in, external, internal; `import/order` bật lỗi.
+- Format trước commit nếu cần: `yarn format`.

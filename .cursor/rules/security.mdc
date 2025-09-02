@@ -1,0 +1,9 @@
+---
+description: Quy tắc bảo mật và cấu hình
+alwaysApply: true
+---
+
+# BẢO MẬT & CẤU HÌNH
+- Dùng biến môi trường `.env`, không hard-code secrets.
+- Không commit `.env` lên repo; dùng `.env.example` nếu cần.
+- Xem xét phân quyền secrets theo môi trường (dev/stage/prod).

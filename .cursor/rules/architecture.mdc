@@ -1,0 +1,9 @@
+---
+description: Quy tắc kiến trúc microservices
+alwaysApply: true
+---
+
+# KIẾN TRÚC
+- Mô hình microservices: mỗi service độc lập, có Dockerfile, tests, README.
+- Mỗi service có thể build/deploy độc lập.
+- Tái sử dụng qua packages trong `shared/*`.

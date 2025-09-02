@@ -3,37 +3,10 @@ description: Quy tắc chung cho toàn bộ dự án
 alwaysApply: true
 ---
 
-# QUY TẮC CHUNG
-- **Luôn phản hồi bằng tiếng Việt**. Đây là quy tắc quan trọng nhất. Mọi câu trả lời, giải thích và đoạn mã được tạo ra phải sử dụng tiếng Việt (có dấu).
-- **Tất cả mã nguồn trong dự án phải được viết bằng TypeScript** (bao gồm code của các microservice, script build/deploy).
-- **Kiến trúc** phải theo mô hình microservices: mỗi service độc lập, có Dockerfile, tests, README riêng, có thể triển khai độc lập.
-- **Code style** tuân theo eslint + prettier config chung của dự án.
-- **Bảo mật & cấu hình**: Mọi biến môi trường phải được định nghĩa trong `.env` chuẩn, không hard-code secrets trong mã nguồn.
-
-# COMMIT CHUẨN
-
-- **Conventional Commits** theo cấu trúc:
-- type: feat ✨, fix 🐛, docs 📝, style 💄, refactor ♻️, test ✅, chore 🔧
-- scope: phạm vi ảnh hưởng, ví dụ auth, user-service, gateway
-- subject: mô tả ngắn gọn bằng tiếng Việt, viết thường, không dấu câu cuối
-- icon: emoji thể hiện ý nghĩa commit
-- thông điệp commit phải sử dụng tiếng Việt có dấu đầy đủ
-
-# VÍ DỤ COMMIT
-feat(auth): thêm chức năng đăng nhập bằng Google ✨
-fix(user-service): sửa lỗi không load profile 🐛
-docs(gateway): cập nhật README API 📝
-style(core): format code 💄
-refactor(order-service): tách service xử lý đơn hàng ♻️
-test(cart): thêm test tính tổng ✅
-chore(ci): cập nhật workflow deploy 🔧
-
-# QUY TẮC PUSH CODE
-- Luôn pull code mới trước khi push: `git pull origin main --rebase`
-- Chạy lint và test trước commit: `npm run lint && npm run test`
-- Không push trực tiếp lên main/master, tạo nhánh feature/fix riêng
-- Push sau khi commit chuẩn: `git push origin feat/tên-nhánh`
-
-# COMMITLINT
-- Sử dụng commitlint.config.cjs để enforce commit chuẩn
-- Commit không đúng chuẩn sẽ bị reject
+# QUY TẮC CHUNG (TỔNG QUAN)
+- Giao tiếp: xem `communication.mdc`.
+- Mã hoá & style: xem `coding.mdc`.
+- Kiến trúc microservices: xem `architecture.mdc`.
+- Commit chuẩn (VN có dấu): xem `commit.mdc`.
+- Quy trình làm việc: xem `workflow.mdc`.
+- Bảo mật & cấu hình: xem `security.mdc`.
