@@ -1,11 +1,12 @@
-import express, { Express, Request, Response, NextFunction } from "express";
-import client from "prom-client";
-import helmet from "helmet";
-import cors from "cors";
-import rateLimit from "express-rate-limit";
 import { LoggerService } from '@shared/logger';
-import router from "./routers";
+import cors from "cors";
+import express, { Express, Request, Response } from "express";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
+import client from "prom-client";
 import appConfig from "./config/app.config";
+import { errorHandler } from "./middlewares";
+import router from "./routers";
 
 // Initialize Express app
 const app: Express = express();
@@ -50,10 +51,7 @@ router.get("/metrics", async (_req: Request, res: Response) => {
   }
 });
 // Global error handling middleware
-router.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
-  logger.error(error as Error);
-  res.status(500).json({ error: "Internal server error" });
-});
+router.use(errorHandler);
 
 // API routes
 app.use("/api/v1", router);

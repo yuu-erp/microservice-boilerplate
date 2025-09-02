@@ -10,8 +10,8 @@
     "resolveJsonModule": true,
     "baseUrl": ".",
     "paths": {
-      "@shared/config": ["shared/config/src"],
       "@shared/logger": ["shared/logger/src"],
+      "@shared/exception": ["shared/exception/src"],
       "@shared/otel": ["shared/otel/src"],
       "@shared/types": ["shared/types/src"],
       "@shared/http": ["shared/http/src"]
