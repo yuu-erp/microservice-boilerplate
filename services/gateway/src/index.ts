@@ -1,90 +1,79 @@
-import express from "express";
-import pinoHttp from "pino-http";
+import express, { Express, Request, Response, NextFunction } from "express";
+import client from "prom-client";
 import helmet from "helmet";
 import cors from "cors";
-import client from "prom-client";
-import { loadEnv } from "@shared/config";
-import { logger } from "@shared/logger";
-import { initOtel } from "@shared/otel";
+import rateLimit from "express-rate-limit";
+import { LoggerService } from '@shared/logger';
+import router from "./routers";
+import appConfig from "./config/app.config";
 
-const env = loadEnv(process.env);
-initOtel(process.env.SERVICE_NAME || "service", process.env.OTEL_EXPORTER_OTLP_ENDPOINT);
+// Initialize Express app
+const app: Express = express();
+const isDev = process.env.NODE_ENV !== "production";
+const logger = new LoggerService({ moduleName: "App", isDev });
+
+const PORT = appConfig.port
+// Collect default Prometheus metrics
 client.collectDefaultMetrics();
 
-export const app = express();
-app.use(express.json());
-app.use(pinoHttp({ logger }));
-app.use(helmet());
-app.use(cors());
 
-app.get("/healthz", (_req, res) => res.json({ status: "ok" }));
-app.get("/readyz", (_req, res) => res.json({ ready: true }));
-app.get("/metrics", async (_req, res) => {
-  res.set("Content-Type", client.register.contentType);
-  res.end(await client.register.metrics());
-});
-
-const port = Number(env.PORT || 3000);
-if (require.main === module) {
-  app.listen(port, () => logger.info({ port }, "gateway started"));
+if (isNaN(PORT)) {
+  logger.error("Invalid PORT environment variable");
+  process.exit(1);
 }
 
+// Middleware
+app.use(rateLimit({
+  windowMs: appConfig.rateLimit.windowMs,
+  max: appConfig.rateLimit.max,
+  message: { error: "Too many requests, please try again later" },
+}));
+app.use(logger.expressMiddleware());
+app.use(express.json());
+app.use(helmet());
+app.use(cors({
+  origin: process.env.CORS_ORIGIN?.split(",") || "*", // Allow specific origins
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true,
+}));
 
-import http from "http";
-import { createProxyMiddleware } from "http-proxy-middleware";
-import { Server } from "socket.io";
-import { createAdapter } from "@socket.io/redis-adapter";
-import Redis from "ioredis";
-import jwt from "jsonwebtoken";
-import rateLimit from "express-rate-limit";
-
-// HTTP middleware already set up above
-app.use(rateLimit({ windowMs: 60_000, max: 300 }));
-
-// Metrics/health already added.
-
-// JWT for HTTP (skip /auth/*)
-app.use((req, res, next) => {
-  if (req.path.startsWith("/auth")) return next();
-  const auth = req.headers.authorization;
-  if (!auth) return res.status(401).json({ error: "missing token" });
+// Health and readiness endpoints
+router.get("/healthz", (_req: Request, res: Response) => res.json({ status: "ok" }));
+router.get("/readyz", (_req: Request, res: Response) => res.json({ ready: true }));
+router.get("/metrics", async (_req: Request, res: Response) => {
   try {
-    (req as any).user = jwt.verify(auth.replace("Bearer ", ""), process.env.JWT_SECRET || "secret");
-    next();
-  } catch {
-    return res.status(401).json({ error: "invalid token" });
+    res.set("Content-Type", client.register.contentType);
+    res.end(await client.register.metrics());
+  } catch (error) {
+    logger.error(error as Error);
+    res.status(500).json({ error: "Failed to retrieve metrics" });
   }
 });
-
-// Proxies
-app.use("/auth", createProxyMiddleware({ target: process.env.AUTH_SERVICE_URL, changeOrigin: true }));
-app.use("/users", createProxyMiddleware({ target: process.env.USER_SERVICE_URL, changeOrigin: true }));
-app.use("/chats", createProxyMiddleware({ target: process.env.CHAT_SERVICE_URL, changeOrigin: true }));
-app.use("/messages", createProxyMiddleware({ target: process.env.MESSAGE_SERVICE_URL, changeOrigin: true }));
-
-const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
-
-// Redis adapter
-const pubClient = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
-const subClient = pubClient.duplicate();
-io.adapter(createAdapter(pubClient, subClient));
-
-io.use((socket, next) => {
-  const token = socket.handshake.auth?.token;
-  if (!token) return next(new Error("unauthorized"));
-  try {
-    (socket as any).user = jwt.verify(token, process.env.JWT_SECRET || "secret");
-    next();
-  } catch (e) { next(e as any); }
+// Global error handling middleware
+router.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
+  logger.error(error as Error);
+  res.status(500).json({ error: "Internal server error" });
 });
 
-io.on("connection", (socket) => {
-  socket.on("join", (chatId: string) => socket.join(chatId));
-  socket.on("typing", (chatId: string) => io.to(chatId).emit("chat:typing", { chatId }));
+// API routes
+app.use("/api/v1", router);
+
+// Graceful shutdown
+const server = app.listen(PORT, () => {
+  logger.info(`Gateway started on port ${PORT}`);
 });
 
-const port = Number(process.env.PORT || 4000);
-if (require.main === module) {
-  server.listen(port, () => console.log("gateway started", port));
-}
+// Handle termination signals
+const shutdown = () => {
+  logger.info("Shutting down server...");
+  server.close(() => {
+    logger.info("Server shut down gracefully");
+    process.exit(0);
+  });
+};
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
+
+// Export for testing or module usage
+export default app;
