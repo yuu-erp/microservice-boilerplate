@@ -1,0 +1,24 @@
+## Branch naming rule
+
+- Language: English only, clear and concise.
+- Format: `<type>/<short-kebab-description>`
+  - `type`: `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `style`
+  - `short-kebab-description`: kebab-case, no spaces, no uppercase, no accents
+- Optional ticket id suffix: `<type>/<short-kebab-description>-<ticketId>`
+- Examples (valid):
+  - `feat/add-google-login`
+  - `fix/user-profile-loading`
+  - `refactor/auth-module-structure`
+  - `feat/implement-nestjs-gateway-MC-123`
+- Examples (invalid):
+  - `feat/them-dang-nhap-google` (Vietnamese)
+  - `Feat/Add_Google_Login` (uppercase and underscores)
+  - `update-login` (missing `type`)
+
+### Workflow reminders
+
+1. Create from `main`: `git pull origin main --rebase && git checkout -b <branch-name>`
+2. Keep commits scoped to the branch purpose.
+3. Rebase with `main` before PR: `git pull origin main --rebase`.
+4. Use Conventional Commits (VN) for commit messages.
+
