@@ -1,0 +1,35 @@
+{
+  "name": "micro-chat-enterprise",
+  "private": true,
+  "workspaces": [
+    "services/*",
+    "shared/*",
+    "cli/"
+  ],
+  "packageManager": "yarn@4.3.1",
+  "scripts": {
+    "cli:dev": "yarn workspace @micro/cli dev",
+    "cli:build": "yarn workspace @micro/cli build",
+    "cli": "yarn workspace @micro/cli micro-cli",
+    "build": "turbo run build",
+    "dev": "turbo run dev --parallel",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "format": "prettier --write .",
+    "prepare": "husky install"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.4.0",
+    "@commitlint/config-conventional": "^19.4.0",
+    "@types/node": "^20.14.12",
+    "eslint": "^8.57.0",
+    "husky": "^9.1.5",
+    "lint-staged": "^15.2.7",
+    "prettier": "^3.3.3",
+    "turbo": "^2.0.6",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1"
+  }
+}

@@ -1,0 +1,76 @@
+version: "3.9"
+services:
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  pg_auth:
+    image: postgres:16-alpine
+    environment: { POSTGRES_PASSWORD: authpass, POSTGRES_USER: auth, POSTGRES_DB: authdb }
+    ports: ["5433:5432"]
+
+  pg_user:
+    image: postgres:16-alpine
+    environment: { POSTGRES_PASSWORD: userpass, POSTGRES_USER: usersvc, POSTGRES_DB: userdb }
+    ports: ["5434:5432"]
+
+  pg_chat:
+    image: postgres:16-alpine
+    environment: { POSTGRES_PASSWORD: chatpass, POSTGRES_USER: chatsvc, POSTGRES_DB: chatdb }
+    ports: ["5435:5432"]
+
+  pg_message:
+    image: postgres:16-alpine
+    environment: { POSTGRES_PASSWORD: msgpass, POSTGRES_USER: msgsvc, POSTGRES_DB: msgdb }
+    ports: ["5436:5432"]
+
+  gateway:
+    build: ./services/gateway
+    environment:
+      PORT: 4000
+      REDIS_URL: redis://redis:6379
+      AUTH_SERVICE_URL: http://auth-service:3001
+      USER_SERVICE_URL: http://user-service:3002
+      CHAT_SERVICE_URL: http://chat-service:3003
+      MESSAGE_SERVICE_URL: http://message-service:3004
+      JWT_SECRET: supersecret
+    ports: ["4000:4000"]
+    depends_on: [redis, auth-service, user-service, chat-service, message-service]
+
+  auth-service:
+    build: ./services/auth-service
+    environment:
+      SERVICE_NAME: auth-service
+      PORT: 3001
+      POSTGRES_URL: postgres://auth:authpass@pg_auth:5432/authdb
+      JWT_SECRET: supersecret
+    ports: ["3001:3001"]
+    depends_on: [pg_auth]
+
+  user-service:
+    build: ./services/user-service
+    environment:
+      SERVICE_NAME: user-service
+      PORT: 3002
+      POSTGRES_URL: postgres://usersvc:userpass@pg_user:5432/userdb
+    ports: ["3002:3002"]
+    depends_on: [pg_user]
+
+  chat-service:
+    build: ./services/chat-service
+    environment:
+      SERVICE_NAME: chat-service
+      PORT: 3003
+      POSTGRES_URL: postgres://chatsvc:chatpass@pg_chat:5432/chatdb
+    ports: ["3003:3003"]
+    depends_on: [pg_chat]
+
+  message-service:
+    build: ./services/message-service
+    environment:
+      SERVICE_NAME: message-service
+      PORT: 3004
+      POSTGRES_URL: postgres://msgsvc:msgpass@pg_message:5432/msgdb
+      REDIS_URL: redis://redis:6379
+    ports: ["3004:3004"]
+    depends_on: [pg_message, redis]

@@ -1,0 +1,40 @@
+# ---------------------------------
+# Node.js
+# ---------------------------------
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+.env
+.env.*.local
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+.cache/
+coverage/
+.vscode/
+.idea/
+
+# ---------------------------------
+# Turbo / Monorepo
+# ---------------------------------
+.turbo/
+turbo.log
+
+# ---------------------------------
+# Logs & Temp
+# ---------------------------------
+logs/
+*.log
+*.tmp
+*.swp
+*.swo
+
+# ---------------------------------
+# OS-specific
+# ---------------------------------
+.DS_Store
+Thumbs.db
