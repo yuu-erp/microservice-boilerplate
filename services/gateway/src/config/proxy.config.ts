@@ -38,3 +38,5 @@ export const proxyConfig: Record<string, ProxyConfig> = {
     retries: 2,
   },
 };
+
+console.log('proxyConfig', proxyConfig);

@@ -43,16 +43,6 @@ async function bootstrap() {
   });
 
   // Global error handling
-  app.use((err: Error, req: any, res: any) => {
-    console.error('[Gateway] Global error:', err.stack);
-    if (!res.headersSent) {
-      res.status(500).json({
-        status: 'error',
-        message: 'Internal server error',
-        timestamp: new Date().toISOString(),
-      });
-    }
-  });
 
   const port = Number(process.env.PORT) || 3000;
   await app.listen(port);

@@ -21,7 +21,6 @@ interface HealthStatus {
 export class HealthService {
   async getHealthStatus(): Promise<HealthStatus> {
     const services: Record<string, ServiceHealth> = {};
-
     // Check each service health
     for (const [path, config] of Object.entries(proxyConfig)) {
       const serviceName = path.replace('/api/v1/', '');

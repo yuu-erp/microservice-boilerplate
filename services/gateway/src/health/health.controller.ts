@@ -9,7 +9,6 @@ export class HealthController {
   @Get()
   async check(@Res() res: Response) {
     const healthStatus = await this.healthService.getHealthStatus();
-
     const isHealthy = Object.values(healthStatus.services).every(
       (status) => status.status === 'healthy',
     );
